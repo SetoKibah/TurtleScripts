@@ -34,6 +34,7 @@ local function TurnToNextRow()
         GoLeft = true
     end
 end
+
 local function emptyInventory()
     local isBlock, block = turtle.inspect()
     if(isBlock and block.name == "minecraft:chest" ) then
@@ -41,8 +42,11 @@ local function emptyInventory()
             turtle.select(i)
             turtle.drop()
         end
+    else
+        print("Cannot Empty inventory, no chest")
     end
 end
+
 local function goToChest(currentRow)
     turtle.turnRight()
     for i = 1, currentRow do
