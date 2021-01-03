@@ -41,6 +41,7 @@ local function emptyInventory()
             turtle.select(i)
             turtle.drop()
         end
+    end
 end
 local function goToChest(currentRow)
     turtle.turnRight()
