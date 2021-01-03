@@ -1,6 +1,6 @@
 GoLeft = false
-ROW_DEPTH = 10
-ROW_COUNT = 10
+ROW_DEPTH = 5
+ROW_COUNT = 3
 
 local function digRowAndReturn() 
     for i=1, ROW_DEPTH, 1  do
