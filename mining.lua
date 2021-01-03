@@ -12,6 +12,7 @@ local function digRowAndReturn()
     turtle.turnLeft()
     turtle.turnLeft()
     for i = 1, ROW_DEPTH, 1 do
+        turtle.dig()
         turtle.forward()
     end
 end
