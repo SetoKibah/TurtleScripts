@@ -1,7 +1,6 @@
 GoLeft = false
 ROW_DEPTH = 10
-ROW_DEPTH = 100
-ROW_COUNT = 100
+ROW_COUNT = 10
 
 local function digRowAndReturn() 
     for i=1, ROW_DEPTH, 1  do
@@ -42,7 +41,6 @@ local function emptyInventory()
             turtle.select(i)
             turtle.drop()
         end
-@@ -51,27 +52,28 @@
 local function goToChest(currentRow)
     turtle.turnRight()
     for i = 1, currentRow do
@@ -64,7 +62,6 @@ end
 
 
 -- start main here
-for row = 1, 5 do
 -- place a two wide chest behind turtle (and to the back-left corner)
 for row = 1, ROW_COUNT do
     digRowAndReturn()
