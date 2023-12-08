@@ -99,8 +99,10 @@ end
 -- Main loop
 torch_index = 0 -- tracks position in the row between torches
 
+-- Start the process, assuming we are facing the intended dig direction
 for row = 1, ROW_COUNT do -- iterate through the grid layout
     for _ = 1, ROW_DEPTH do
+        -- Dig the tiles forward, above, and below. Results in a "shelf" at the end
         forwardWithDig()
         torch_index = torch_index + 1
         turtle.digUp()
@@ -113,6 +115,20 @@ for row = 1, ROW_COUNT do -- iterate through the grid layout
             turtle.turnLeft()
             torch_index = 0
         end
+        
+        -- check fuel level and refuel if needed
+        local present_fuel = turtle.getFuelLevel()
+        if present_fuel < 600 then
+            local ok, error = turtle.refuel(10)
+            if ok then
+                local new_level = turtle.getFuelLevel()
+                print(("Refuelled %d, current level is %d"):format(new_level - present_fuel, new_level))
+            end
+            if error then
+                print(("Error %d"):format(error))
+            end
+        end
+
     end
 
     returnToOrigin(row) -- return to the chest at origin
