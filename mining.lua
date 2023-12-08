@@ -2,6 +2,20 @@
 local ROW_DEPTH = 5
 local ROW_COUNT = 3
 
+--print("Enter row count: ")
+--local ROW_COUNT = read("*n")
+--print("Enter row depth: ")
+---local ROW_DEPTH = read("*n")
+
+--print("Rows: ", ROW_COUNT, "\nDepth: ", ROW_DEPTH, "\n")
+--monitor.write("Excavating")
+--for i = 0, 3 do
+ --   monitor.write(".")
+    --sleep(1)
+--end
+--print("Start.")
+--sleep(10)
+
 -- Initialize direction variable
 local direction = 1 -- 1 for right, -1 for left
 
@@ -23,8 +37,31 @@ local function turnToNextRow()
     turtle.turnRight()
 end
 
+-- Function to return to origin point
+local function returnToOrigin(currentRow)
+    -- Assuming we are facing the correct direction
+    turtle.turnLeft()
+    for i = 1, currentRow do
+        turtle.forward()
+    end
+    turtle.turnRight()
+end
+
+-- Function to return to last row position
+local function resumeRowPostion(currentRow)
+    -- Assuming we are facing the correct direction
+    turtle.turnRight()
+    for i = 1, currentRow do
+    turtle.forward()
+    end
+    turtle.turnLeft()
+end
+
 -- Function to empty the inventory into a chest if available
 local function emptyInventory()
+    -- assuming we turn around
+    turtle.turnLeft()
+    turtle.turnLeft()
     local isBlock = turtle.detect()
     if isBlock then
         local success, block = turtle.inspect()
@@ -39,6 +76,9 @@ local function emptyInventory()
     else
         print("Cannot empty inventory, no block in front")
     end
+    -- resuming original orientation
+    turtle.turnLeft()
+    turtle.turnLeft()
 end
 
 -- Function to place a torch
@@ -57,10 +97,9 @@ local function moveToRow(row)
 end
 
 -- Main loop
--- index the torch spacing
-torch_index = 0
--- starting with the first row, carrying on with every row
-for row = 1, ROW_COUNT do
+torch_index = 0 -- tracks position in the row between torches
+
+for row = 1, ROW_COUNT do -- iterate through the grid layout
     for _ = 1, ROW_DEPTH do
         forwardWithDig()
         torch_index = torch_index + 1
@@ -75,8 +114,9 @@ for row = 1, ROW_COUNT do
             torch_index = 0
         end
     end
-    -- go to next row
-    moveToRow(row)
-    emptyInventory()
-    turnToNextRow()
+
+    returnToOrigin(row) -- return to the chest at origin
+    emptyInventory() -- turn around, clear the inventory, return to normal
+    moveToRow(row) -- return to the original row
+    turnToNextRow() -- clear obstacles and prep the next row
 end
