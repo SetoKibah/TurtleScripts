@@ -41,6 +41,12 @@ local function emptyInventory()
     end
 end
 
+-- Function to place a torch
+local function placeTorch()
+    turtle.place("minecraft:torch")
+end
+
+
 -- Function to move to a specific row
 local function moveToRow(row)
     turtle.turnRight()
@@ -51,13 +57,25 @@ local function moveToRow(row)
 end
 
 -- Main loop
+-- index the torch spacing
+torch_index = 0
+-- starting with the first row, carrying on with every row
 for row = 1, ROW_COUNT do
     for _ = 1, ROW_DEPTH do
         forwardWithDig()
+        torch_index = torch_index + 1
         turtle.digUp()
         turtle.digDown()
-    end
 
+        -- place torch every 12 blocks, when we're at the last row
+        if torch_index == 11 and row == ROW_COUNT then
+            turtle.turnRight()
+            placeTorch()
+            turtle.turnLeft()
+            torch_index = 0
+        end
+    end
+    -- go to next row
     moveToRow(row)
     emptyInventory()
     turnToNextRow()
