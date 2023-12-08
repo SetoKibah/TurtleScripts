@@ -1,78 +1,64 @@
-GoLeft = false
-ROW_DEPTH = 5
-ROW_COUNT = 3
+-- Parameterized constants
+local ROW_DEPTH = 5
+local ROW_COUNT = 3
 
-local function digRowAndReturn() 
-    for i=1, ROW_DEPTH, 1  do
-        turtle.dig()
-        turtle.forward()
-        turtle.digUp()
-        turtle.digDown()
-    end
-    turtle.turnLeft()
-    turtle.turnLeft()
-    for i = 1, ROW_DEPTH, 1 do
-        turtle.dig()
-        turtle.forward()
-    end
-end
-local function TurnToNextRow()
-    if GoLeft then
-        turtle.turnLeft()
-        turtle.dig()
-        turtle.forward()
-        turtle.digUp()
-        turtle.digDown()
-        turtle.turnLeft()
-        GoLeft = false
-    else
-        turtle.turnRight()
-        turtle.dig()
-        turtle.forward()
-        turtle.digUp()
-        turtle.digDown()
-        turtle.turnRight()
-        GoLeft = true
-    end
-end
+-- Initialize direction variable
+local direction = 1 -- 1 for right, -1 for left
 
-local function emptyInventory()
-    local isBlock, block = turtle.inspect()
-    if(isBlock and block.name == "minecraft:chest" ) then
-        for i = 1, 16 do
-            turtle.select(i)
-            turtle.drop()
-        end
-    else
-        print("Cannot Empty inventory, no chest")
-    end
-end
-
-local function goToChest(currentRow)
-    turtle.turnRight()
-    for i = 1, currentRow do
-        turtle.forward()
-    end
-    turtle.turnLeft()
-end
-local function goToNextRow(currentRow)
-    turtle.turnLeft()
-    for i = 1, currentRow do
-        turtle.forward()
-    end
+-- Function to move the turtle forward with digging
+local function forwardWithDig()
     turtle.dig()
-    turtle.forward()
+    while not turtle.forward() do
+        turtle.dig()
+    end
+end
+
+-- Function to turn to the next row
+local function turnToNextRow()
+    turtle.turnRight()
+    turtle.dig()
+    forwardWithDig()
     turtle.digUp()
     turtle.digDown()
+    turtle.turnRight()
+end
+
+-- Function to empty the inventory into a chest if available
+local function emptyInventory()
+    local isBlock = turtle.detect()
+    if isBlock then
+        local success, block = turtle.inspect()
+        if success and block.name == "minecraft:chest" then
+            for i = 1, 16 do
+                turtle.select(i)
+                turtle.drop()
+            end
+        else
+            print("Cannot empty inventory, no chest")
+        end
+    else
+        print("Cannot empty inventory, no block in front")
+    end
+end
+
+-- Function to move to a specific row
+local function moveToRow(row)
+    turtle.turnRight()
+    for i = 1, row do
+        forwardWithDig()
+    end
     turtle.turnLeft()
 end
 
-
--- start main here
--- place a two wide chest behind turtle (and to the back-left corner)
+-- Main loop
 for row = 1, ROW_COUNT do
-    digRowAndReturn()
-    goToChest(row)
+    for _ = 1, ROW_DEPTH do
+        forwardWithDig()
+        turtle.digUp()
+        turtle.digDown()
+    end
+
+    moveToRow(row)
     emptyInventory()
-    goToNextRow(row)
+    turnToNextRow()
 end
