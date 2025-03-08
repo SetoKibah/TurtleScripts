@@ -2,20 +2,6 @@
 local ROW_DEPTH = 5
 local ROW_COUNT = 3
 
---print("Enter row count: ")
---local ROW_COUNT = read("*n")
---print("Enter row depth: ")
----local ROW_DEPTH = read("*n")
-
---print("Rows: ", ROW_COUNT, "\nDepth: ", ROW_DEPTH, "\n")
---monitor.write("Excavating")
---for i = 0, 3 do
- --   monitor.write(".")
-    --sleep(1)
---end
---print("Start.")
---sleep(10)
-
 -- Initialize direction variable
 local direction = 1 -- 1 for right, -1 for left
 
@@ -30,31 +16,35 @@ end
 -- Function to turn to the next row
 local function turnToNextRow()
     turtle.turnRight()
-    turtle.dig()
     forwardWithDig()
-    turtle.digUp()
-    turtle.digDown()
     turtle.turnRight()
 end
 
 -- Function to return to origin point
-local function returnToOrigin(currentRow)
+local function returnToOrigin(currentRow, rowDepth)
     -- Assuming we are facing the correct direction
     turtle.turnLeft()
     for i = 1, currentRow do
-        turtle.forward()
+        for j = 1, rowDepth do
+            turtle.back()
+        end
+        if i < currentRow then
+            turtle.turnRight()
+            turtle.back()
+            turtle.turnRight()
+        end
     end
-    turtle.turnRight()
+    turtle.turnLeft()
 end
 
 -- Function to return to last row position
-local function resumeRowPostion(currentRow)
+local function resumeRowPosition(currentRow)
     -- Assuming we are facing the correct direction
     turtle.turnRight()
     for i = 1, currentRow do
-    turtle.forward()
+        turtle.forward()
     end
-    turtle.turnLeft()
+    turtle.turnLeft() 
 end
 
 -- Function to empty the inventory into a chest if available
@@ -86,7 +76,6 @@ local function placeTorch()
     turtle.place("minecraft:torch")
 end
 
-
 -- Function to move to a specific row
 local function moveToRow(row)
     turtle.turnRight()
@@ -94,6 +83,21 @@ local function moveToRow(row)
         forwardWithDig()
     end
     turtle.turnLeft()
+end
+
+-- Function to check and refuel the turtle
+local function checkAndRefuel()
+    local present_fuel = turtle.getFuelLevel()
+    if present_fuel < 600 then
+        local ok, error = turtle.refuel(10)
+        if ok then
+            local new_level = turtle.getFuelLevel()
+            print(("Refuelled %d, current level is %d"):format(new_level - present_fuel, new_level))
+        end
+        if error then
+            print(("Error %d"):format(error))
+        end
+    end
 end
 
 -- Main loop
@@ -108,8 +112,8 @@ for row = 1, ROW_COUNT do -- iterate through the grid layout
         turtle.digUp()
         turtle.digDown()
 
-        -- place torch every 12 blocks, when we're at the last row
-        if torch_index == 11 and row == ROW_COUNT then
+        -- place torch every 12 blocks
+        if torch_index == 12 then
             turtle.turnRight()
             placeTorch()
             turtle.turnLeft()
@@ -117,21 +121,10 @@ for row = 1, ROW_COUNT do -- iterate through the grid layout
         end
         
         -- check fuel level and refuel if needed
-        local present_fuel = turtle.getFuelLevel()
-        if present_fuel < 600 then
-            local ok, error = turtle.refuel(10)
-            if ok then
-                local new_level = turtle.getFuelLevel()
-                print(("Refuelled %d, current level is %d"):format(new_level - present_fuel, new_level))
-            end
-            if error then
-                print(("Error %d"):format(error))
-            end
-        end
-
+        checkAndRefuel()
     end
 
-    returnToOrigin(row) -- return to the chest at origin
+    returnToOrigin(row, ROW_DEPTH) -- return to the chest at origin
     emptyInventory() -- turn around, clear the inventory, return to normal
     moveToRow(row) -- return to the original row
     turnToNextRow() -- clear obstacles and prep the next row
